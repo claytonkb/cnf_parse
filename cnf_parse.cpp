@@ -22,6 +22,116 @@ int main(void){
 }
 
 
+// c ...
+// ...
+// p cnf var cls
+// <int> ... <int> 0
+// ...
+clause_list *parse_DIMACS(char *dimacs_str){
+
+    clause_list *cl = new clause_list;
+
+    skip_comments(dimacs_str);
+    read_format(dimacs_str, cl);
+    read_clauses(dimacs_str, cl);
+    skip_ws(dimacs_str);
+
+}
+
+
+//
+//
+int read_format(char *dimacs_str, clause_list *cl){
+
+    // p <format> <var> <cls>
+    //      format=cnf
+    //      vars=number of variables
+    //      cls=number of clauses
+
+}
+
+
+//
+//
+int read_clauses(char *dimacs_str, clause_list *cl){
+
+//    cmd_code_str = strtok(buffer, " ");
+//    if(cmd_code_str == NULL) continue;
+//    cmd_code = atoi(cmd_code_str);
+//    check if zero
+
+}
+
+
+int skip_comments(char *dimacs_str){
+
+    int i=0;
+
+    while(   dimacs_str[i  ] == 'c'
+          && dimacs_str[i+1] == ' '){
+
+        i+=2;
+
+        while(dimacs_str[i] != 0xa && dimacs_str[i] != 0xd)
+            i++;
+
+        if(dimacs_str[i] == 0xa) // Windows CR+LF
+            i++;
+
+    }
+
+    if(dimacs_str[i] != 'p')
+        _fatal("expected 'p'\n");
+
+}
+
+
+//
+//
+int skip_ws(char *dimacs_str){
+
+}
+
+
+//void read_clause(void){
+//}
+//
+//void parse_int(void){
+//}
+//
+//void skip_line(void){
+//}
+//
+//void skip_ws(void){
+//}
+
+//    cstring_vector* str_tokens = new vector<char*>;
+//    char* cbuffer;
+//    char *pch;
+//
+//    pch = strtok(cbuffer," \n");
+//    bool comment_mode=false;
+//
+//    while(pch != NULL){
+//
+//        if(comment_mode){
+//            if(streq(pch,"--"))
+//                comment_mode = false;
+//        }
+//        else{
+//            if(streq(pch,"--"))
+//                comment_mode = true;
+//            else
+//                str_tokens->push_back(pch);
+//        }
+//
+//        pch = strtok(NULL," \n");
+//
+//    }
+//
+//    return str_tokens;
+
+
 //
 //
 void dev_prompt(void){
