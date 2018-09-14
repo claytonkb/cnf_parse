@@ -27,12 +27,12 @@ int main(void){
 // p cnf var cls
 // <int> ... <int> 0
 // ...
+// <int> ... <int> 0
 clause_list *parse_DIMACS(char *dimacs_str){
 
     // XXX as a courtesy, should probably make a copy of dimacs_str so we can
     // treat the original as a const XXX
 
-//    clause_list *cl = new clause_list;
     clause_list *cl = (clause_list*)malloc(sizeof(clause_list));
 
     skip_comments(dimacs_str);
@@ -46,6 +46,8 @@ clause_list *parse_DIMACS(char *dimacs_str){
     skip_ws(dimacs_str);
     // check we're at EOF (warn, don't error)
 
+    return cl;
+
 }
 
 
@@ -58,15 +60,28 @@ int read_format(char *dimacs_str, clause_list *cl){
     //      vars=number of variables
     //      cls=number of clauses
 
-    //skip whitespace
-    //cnf
-    //strtok
-    //strtok
+    char *token = strtok(dimacs_str, " ");
+    int var_int;
 
-//    cmd_code_str = strtok(buffer, " ");
-//    if(cmd_code_str == NULL) continue;
-//    cmd_code = atoi(cmd_code_str);
-//    check if zero
+    if(!streq(token,"p")){
+        _fatal("Expected 'p' line");
+    }
+
+    token = strtok(dimacs_str, " ");
+
+    if(!streq(token,"cnf")){
+        _fatal("Expected token 'cnf'");
+    }
+
+    token = strtok(dimacs_str, " ");
+    var_int = atoi(token);
+    // FIXME var_int check
+    cl->num_variables = var_int;
+
+    token = strtok(dimacs_str, " ");
+    var_int = atoi(token);
+    // FIXME var_int check
+    cl->num_clauses = var_int;
 
 }
 
@@ -93,7 +108,7 @@ int read_clauses(char *dimacs_str, clause_list *cl){
             var_int_str = strtok(dimacs_str, " ");
 
             if(var_int_str == NULL){
-                _fatal("Unexpected EOF\n");
+                _fatal("Unexpected EOF");
             }
 
             var_int = atoi(var_int_str);
@@ -128,8 +143,8 @@ int skip_comments(char *dimacs_str){
 
     }
 
-    if(dimacs_str[i] != 'p')
-        _fatal("expected 'p'\n");
+//    if(dimacs_str[i] != 'p')
+//        _fatal("expected 'p'");
 
 }
 
@@ -137,6 +152,16 @@ int skip_comments(char *dimacs_str){
 //
 //
 int skip_ws(char *dimacs_str){
+
+    int skipped=0;
+
+    while(   dimacs_str[skipped] == ' '
+          || dimacs_str[skipped] == '\t'
+          || dimacs_str[skipped] == 0xa
+          || dimacs_str[skipped] == 0xd)
+        skipped++;
+
+    return skipped;
 
 }
 
