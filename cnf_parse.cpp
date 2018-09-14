@@ -29,12 +29,22 @@ int main(void){
 // ...
 clause_list *parse_DIMACS(char *dimacs_str){
 
-    clause_list *cl = new clause_list;
+    // XXX as a courtesy, should probably make a copy of dimacs_str so we can
+    // treat the original as a const XXX
+
+//    clause_list *cl = new clause_list;
+    clause_list *cl = (clause_list*)malloc(sizeof(clause_list));
 
     skip_comments(dimacs_str);
     read_format(dimacs_str, cl);
+
+    cl->clauses   = (int*)malloc(sizeof(int)*cl->num_clauses);
+    cl->variables = (int*)malloc(sizeof(int)*cl->num_variables);
+
     read_clauses(dimacs_str, cl);
+
     skip_ws(dimacs_str);
+    // check we're at EOF (warn, don't error)
 
 }
 
@@ -48,6 +58,16 @@ int read_format(char *dimacs_str, clause_list *cl){
     //      vars=number of variables
     //      cls=number of clauses
 
+    //skip whitespace
+    //cnf
+    //strtok
+    //strtok
+
+//    cmd_code_str = strtok(buffer, " ");
+//    if(cmd_code_str == NULL) continue;
+//    cmd_code = atoi(cmd_code_str);
+//    check if zero
+
 }
 
 
@@ -55,10 +75,38 @@ int read_format(char *dimacs_str, clause_list *cl){
 //
 int read_clauses(char *dimacs_str, clause_list *cl){
 
-//    cmd_code_str = strtok(buffer, " ");
-//    if(cmd_code_str == NULL) continue;
-//    cmd_code = atoi(cmd_code_str);
-//    check if zero
+    int clause_ctr   = 0;
+    int variable_ctr = 0;
+
+    char *var_int_str;
+    int   var_int;
+
+    while(clause_ctr < cl->num_clauses){
+
+        var_int=1;
+
+        cl->clauses[clause_ctr] = variable_ctr;
+        clause_ctr++;
+
+        while(var_int){
+
+            var_int_str = strtok(dimacs_str, " ");
+
+            if(var_int_str == NULL){
+                _fatal("Unexpected EOF\n");
+            }
+
+            var_int = atoi(var_int_str);
+            // FIXME: Detect problems here
+
+            // add var_int to cl->variables
+            cl->variables[variable_ctr] = var_int;
+            variable_ctr++;
+
+        }
+        //skip newline?
+
+    }
 
 }
 
@@ -92,18 +140,6 @@ int skip_ws(char *dimacs_str){
 
 }
 
-
-//void read_clause(void){
-//}
-//
-//void parse_int(void){
-//}
-//
-//void skip_line(void){
-//}
-//
-//void skip_ws(void){
-//}
 
 //    cstring_vector* str_tokens = new vector<char*>;
 //    char* cbuffer;
