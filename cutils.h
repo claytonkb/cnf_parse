@@ -50,8 +50,18 @@
 #define _endl           do{ fprintf(stderr, "\n"); fflush(stderr); } while(0)
 #define _prn(x)         do{ fprintf(stderr, "%s", x); fflush(stderr); } while(0)
 #define _say(x)         do{ fprintf(stderr, "%s\n", x); fflush(stderr); } while(0)  // _say#
-#define _msg(x)         do{ _say("LOGRAD: " x); } while(0)  // _say#
+#define _msg(x)         do{ _say("CNF_PARSE: " x); } while(0)  // _say#
 #define _trace          do{ fprintf(stderr, "TRACE: %s() in %s line %d\n", __func__, __FILE__, __LINE__); fflush(stderr); } while(0)   // _trace# 
+
+
+int dev_i;
+#define _mem(x,sz)                                                  \
+    fprintf(stderr, "-------- %d\n", sz);                           \
+    for(dev_i=0; dev_i<sz; dev_i++){                                \
+        fprintf(stderr, "%08x ", (unsigned)dev_i);                 \
+        fprintf(stderr, "%08x\n", x[dev_i]);                      \
+    }
+
 
 #endif // CUTILS_H
 

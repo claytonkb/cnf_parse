@@ -35,6 +35,7 @@ typedef struct {
     int    *clauses;
     int     num_variables;
     int     num_clauses;
+    int     num_assignments;
 } clause_list;
 
 

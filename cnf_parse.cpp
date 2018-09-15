@@ -8,6 +8,9 @@
 void dev_prompt(void);
 void dev_get_line(char *buffer, FILE *stream);
 void dev_menu(void);
+char *slurp_file(char *filename);
+FILE *open_file(char *filename, const char *attr);
+int file_size(FILE *file);
 
 using namespace std;
 
@@ -34,16 +37,21 @@ clause_list *parse_DIMACS(char *dimacs_str){
     // treat the original as a const XXX
 
     clause_list *cl = (clause_list*)malloc(sizeof(clause_list));
+    cl->num_clauses=0;
+    cl->num_variables=0;
 
-    skip_comments(dimacs_str);
-    read_format(dimacs_str, cl);
+    char *parse_str = dimacs_str;
+
+    parse_str += skip_comments(parse_str);
+
+    parse_str += read_format(parse_str, cl);
 
     cl->clauses   = (int*)malloc(sizeof(int)*cl->num_clauses);
-    cl->variables = (int*)malloc(sizeof(int)*cl->num_variables);
+    cl->variables = (int*)malloc(sizeof(int)*8*cl->num_clauses);
 
-    read_clauses(dimacs_str, cl);
+    read_clauses(parse_str, cl);
 
-    skip_ws(dimacs_str);
+    // skip_ws(parse_str);
     // check we're at EOF (warn, don't error)
 
     return cl;
@@ -59,29 +67,34 @@ int read_format(char *dimacs_str, clause_list *cl){
     //      format=cnf
     //      vars=number of variables
     //      cls=number of clauses
-
     char *token = strtok(dimacs_str, " ");
     int var_int;
+
+    char *remainder;
 
     if(!streq(token,"p")){
         _fatal("Expected 'p' line");
     }
 
-    token = strtok(dimacs_str, " ");
+    token = strtok(NULL, " ");
 
     if(!streq(token,"cnf")){
         _fatal("Expected token 'cnf'");
     }
 
-    token = strtok(dimacs_str, " ");
+    token = strtok(NULL, " ");
     var_int = atoi(token);
     // FIXME var_int check
     cl->num_variables = var_int;
 
-    token = strtok(dimacs_str, " ");
+    token = strtok(NULL, " \n");
     var_int = atoi(token);
     // FIXME var_int check
     cl->num_clauses = var_int;
+
+    remainder = (token + (strlen(token)+1));
+
+    return remainder-dimacs_str;
 
 }
 
@@ -91,21 +104,29 @@ int read_format(char *dimacs_str, clause_list *cl){
 int read_clauses(char *dimacs_str, clause_list *cl){
 
     int clause_ctr   = 0;
-    int variable_ctr = 0;
+    int assignment_ctr = 0;
 
     char *var_int_str;
     int   var_int;
 
-    while(clause_ctr < cl->num_clauses){
+    bool init_tok = true;
 
+    while(clause_ctr < cl->num_clauses){
+//_trace;
         var_int=1;
 
-        cl->clauses[clause_ctr] = variable_ctr;
+        cl->clauses[clause_ctr] = assignment_ctr;
         clause_ctr++;
 
         while(var_int){
-
-            var_int_str = strtok(dimacs_str, " ");
+//_trace;
+            if(init_tok){
+                var_int_str = strtok(dimacs_str, " \n");
+                init_tok=false;
+            }
+            else{
+                var_int_str = strtok(NULL, " \n");
+            }
 
             if(var_int_str == NULL){
                 _fatal("Unexpected EOF");
@@ -114,37 +135,40 @@ int read_clauses(char *dimacs_str, clause_list *cl){
             var_int = atoi(var_int_str);
             // FIXME: Detect problems here
 
-            // add var_int to cl->variables
-            cl->variables[variable_ctr] = var_int;
-            variable_ctr++;
+            if(var_int){
+                cl->variables[assignment_ctr] = var_int;
+                assignment_ctr++;
+            }
 
         }
         //skip newline?
 
     }
 
+    cl->num_assignments = assignment_ctr;
+
 }
 
 
+//
+//
 int skip_comments(char *dimacs_str){
 
-    int i=0;
+    int skipped=0;
 
-    while(   dimacs_str[i  ] == 'c'
-          && dimacs_str[i+1] == ' '){
+    while(dimacs_str[skipped] == 'c'){
 
-        i+=2;
+        skipped++;
 
-        while(dimacs_str[i] != 0xa && dimacs_str[i] != 0xd)
-            i++;
+        while(dimacs_str[skipped] != 0xa)
+            skipped++;
 
-        if(dimacs_str[i] == 0xa) // Windows CR+LF
-            i++;
+        while(dimacs_str[skipped] == 0xa)
+            skipped++;
 
     }
 
-//    if(dimacs_str[i] != 'p')
-//        _fatal("expected 'p'");
+    return skipped;
 
 }
 
@@ -166,33 +190,6 @@ int skip_ws(char *dimacs_str){
 }
 
 
-//    cstring_vector* str_tokens = new vector<char*>;
-//    char* cbuffer;
-//    char *pch;
-//
-//    pch = strtok(cbuffer," \n");
-//    bool comment_mode=false;
-//
-//    while(pch != NULL){
-//
-//        if(comment_mode){
-//            if(streq(pch,"--"))
-//                comment_mode = false;
-//        }
-//        else{
-//            if(streq(pch,"--"))
-//                comment_mode = true;
-//            else
-//                str_tokens->push_back(pch);
-//        }
-//
-//        pch = strtok(NULL," \n");
-//
-//    }
-//
-//    return str_tokens;
-
-
 //
 //
 void dev_prompt(void){
@@ -203,6 +200,9 @@ void dev_prompt(void){
     char buffer[256];
 
     int i;
+
+    char *cnf_file;
+    clause_list *cl;
 
     _say("type 0 for menu");
 
@@ -230,7 +230,22 @@ void dev_prompt(void){
                 return;
 
             case 3:
-                _say("cmd_code==3");
+                cmd_code_str = strtok(NULL, " ");
+                if(cmd_code_str == NULL){ _say("not enough arguments"); continue; }
+                cnf_file = slurp_file(cmd_code_str);
+//                printf("%s\n\n", cnf_file);
+                break;
+
+            case 4:
+                cl = parse_DIMACS(cnf_file);
+                break;
+
+            case 5:
+                _mem(cl->clauses, cl->num_clauses);
+                break;
+
+            case 6:
+                _mem(cl->variables, cl->num_assignments);
                 break;
 
             default:
@@ -273,9 +288,57 @@ void dev_menu(void){
     _say( "\n0     .....    list command codes\n"
             "1     .....    dev one-off\n"
             "2     .....    exit\n"
-            "3     .....    unimplemented\n");
+            "3     .....    open cnf_file\n"
+            "4     .....    parse DIMACS\n");
 
 }
+
+
+//
+//
+char *slurp_file(char *filename){
+
+    FILE *f = open_file((char*)filename, "r");
+    int size = file_size(f);
+
+    char *file_buffer = (char*)malloc(size+1);
+    size_t dummy = fread((char*)file_buffer, 1, size, f);
+
+    fclose(f);
+
+    return file_buffer;
+
+}
+
+
+//
+//
+FILE *open_file(char *filename, const char *attr){
+
+    FILE* file;
+
+    file = fopen((char*)filename, attr);
+
+    if(file==NULL)
+        _fatal((char*)filename);
+
+    return file;
+
+}
+
+
+//
+//
+int file_size(FILE *file){
+
+    fseek(file, 0L, SEEK_END);
+    int size = ftell(file);
+    rewind(file);
+
+    return size;
+
+}
+
 
 
 // Clayton Bauman 2018
