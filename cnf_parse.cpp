@@ -31,16 +31,14 @@ int main(void){
 // <int> ... <int> 0
 // ...
 // <int> ... <int> 0
-clause_list *parse_DIMACS(char *dimacs_str){
+clause_list *parse_DIMACS(const char *dimacs_str){
 
-    // XXX as a courtesy, should probably make a copy of dimacs_str so we can
-    // treat the original as a const XXX
+    char *parse_str = (char*)malloc(strlen(dimacs_str)+1);
+    strcpy(parse_str,dimacs_str);
 
     clause_list *cl = (clause_list*)malloc(sizeof(clause_list));
     cl->num_clauses=0;
     cl->num_variables=0;
-
-    char *parse_str = dimacs_str;
 
     parse_str += skip_comments(parse_str);
 
@@ -59,14 +57,12 @@ clause_list *parse_DIMACS(char *dimacs_str){
 }
 
 
-//
-//
+// p <format> <var> <cls>
+//      format=cnf
+//      vars=number of variables
+//      cls=number of clauses
 int read_format(char *dimacs_str, clause_list *cl){
 
-    // p <format> <var> <cls>
-    //      format=cnf
-    //      vars=number of variables
-    //      cls=number of clauses
     char *token = strtok(dimacs_str, " ");
     int var_int;
 
@@ -84,12 +80,10 @@ int read_format(char *dimacs_str, clause_list *cl){
 
     token = strtok(NULL, " ");
     var_int = atoi(token);
-    // FIXME var_int check
     cl->num_variables = var_int;
 
     token = strtok(NULL, " \n");
     var_int = atoi(token);
-    // FIXME var_int check
     cl->num_clauses = var_int;
 
     remainder = (token + (strlen(token)+1));
@@ -112,14 +106,14 @@ int read_clauses(char *dimacs_str, clause_list *cl){
     bool init_tok = true;
 
     while(clause_ctr < cl->num_clauses){
-//_trace;
+
         var_int=1;
 
         cl->clauses[clause_ctr] = assignment_ctr;
         clause_ctr++;
 
         while(var_int){
-//_trace;
+
             if(init_tok){
                 var_int_str = strtok(dimacs_str, " \n");
                 init_tok=false;
@@ -133,7 +127,6 @@ int read_clauses(char *dimacs_str, clause_list *cl){
             }
 
             var_int = atoi(var_int_str);
-            // FIXME: Detect problems here
 
             if(var_int){
                 cl->variables[assignment_ctr] = var_int;
@@ -141,7 +134,6 @@ int read_clauses(char *dimacs_str, clause_list *cl){
             }
 
         }
-        //skip newline?
 
     }
 

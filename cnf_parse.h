@@ -39,7 +39,7 @@ typedef struct {
 } clause_list;
 
 
-clause_list *parse_DIMACS(char *dimacs_str);
+clause_list *parse_DIMACS(const char *dimacs_str);
 int read_format(char *dimacs_str, clause_list *cl);
 int read_clauses(char *dimacs_str, clause_list *cl);
 int skip_comments(char *dimacs_str);
