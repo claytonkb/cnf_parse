@@ -44,9 +44,6 @@ clause_list *parse_DIMACS(const char *dimacs_str){
 
     parse_str += read_format(parse_str, cl);
 
-    cl->clauses   = (int*)malloc(sizeof(int)*cl->num_clauses);
-    cl->variables = (int*)malloc(sizeof(int)*8*cl->num_clauses);
-
     read_clauses(parse_str, cl);
 
     // skip_ws(parse_str);
@@ -93,43 +90,46 @@ int read_format(char *dimacs_str, clause_list *cl){
 }
 
 
-//
+// assumes cl->num_clauses and cl->num_variables are valid
 //
 int read_clauses(char *dimacs_str, clause_list *cl){
 
     int clause_ctr   = 0;
     int assignment_ctr = 0;
 
-    char *var_int_str;
+    char *token;
     int   var_int;
 
     bool init_tok = true;
+
+    int *clauses   = (int*)malloc(sizeof(int)*cl->num_clauses);
+    int *variables = (int*)malloc(sizeof(int)*CLAUSE_K*cl->num_clauses);
 
     while(clause_ctr < cl->num_clauses){
 
         var_int=1;
 
-        cl->clauses[clause_ctr] = assignment_ctr;
+        clauses[clause_ctr] = assignment_ctr;
         clause_ctr++;
 
-        while(var_int){
+        while(var_int && (assignment_ctr < CLAUSE_K*cl->num_clauses)){
 
             if(init_tok){
-                var_int_str = strtok(dimacs_str, " \n");
+                token = strtok(dimacs_str, " \n");
                 init_tok=false;
             }
             else{
-                var_int_str = strtok(NULL, " \n");
+                token = strtok(NULL, " \n");
             }
 
-            if(var_int_str == NULL){
+            if(token == NULL){
                 _fatal("Unexpected EOF");
             }
 
-            var_int = atoi(var_int_str);
+            var_int = atoi(token);
 
             if(var_int){
-                cl->variables[assignment_ctr] = var_int;
+                variables[assignment_ctr] = var_int;
                 assignment_ctr++;
             }
 
@@ -137,9 +137,27 @@ int read_clauses(char *dimacs_str, clause_list *cl){
 
     }
 
+//    remainder = (token + (strlen(token)+1));
+
+    // this should never break unless you have tons of bizarrely huge clauses
+    // if it does, increase CLAUSE_K and recompile
+    if(assignment_ctr >= CLAUSE_K*cl->num_clauses)
+        _fatal("CNF_PARSE couldn't process this CNF file");
+
     cl->num_assignments = assignment_ctr;
+    cl->clauses = clauses;
+
+    if(assignment_ctr){
+        cl->variables = (int*)malloc(sizeof(int)*assignment_ctr);
+        memcpy(cl->variables, variables, sizeof(int)*assignment_ctr);
+        free(variables);
+    }
+    else{
+        cl->variables = NULL;
+    }
 
 }
+
 
 
 //

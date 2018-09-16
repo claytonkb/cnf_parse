@@ -23,6 +23,8 @@
 
 #define streq(x,y)  ( strcmp(x,y) == 0 )
 
+#define CLAUSE_K 8
+
 struct cstring_cmp {
     bool operator () (const char* a, const char* b) const {
         return strcmp(a,b)<0;
