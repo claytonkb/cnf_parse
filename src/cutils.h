@@ -53,8 +53,6 @@
 #define _msg(x)         do{ _say("CNF_PARSE: " x); } while(0)  // _say#
 #define _trace          do{ fprintf(stderr, "TRACE: %s() in %s line %d\n", __func__, __FILE__, __LINE__); fflush(stderr); } while(0)   // _trace# 
 
-
-int dev_i;
 #define _mem(x,sz)                                                  \
     fprintf(stderr, "-------- %d\n", sz);                           \
     for(dev_i=0; dev_i<sz; dev_i++){                                \

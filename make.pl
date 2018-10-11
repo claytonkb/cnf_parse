@@ -20,15 +20,6 @@ else{
     if($ARGV[0] eq "clean"){
         clean();
     }
-#    elsif($ARGV[0] eq "clean_all"){
-#        clean_all();
-#    }
-#    elsif($ARGV[0] eq "lib_babel"){
-#        lib_babel();
-#    }
-#    elsif($ARGV[0] eq "all_libs"){
-#        all_libs();
-#    }
     elsif($ARGV[0] eq "libs"){
         libs();
     }
@@ -41,18 +32,6 @@ sub make_all{
     libs();
     build();
 }
-
-#sub all_libs{
-#    lib_babel();
-#    libs();
-#    `cp lib_babel/obj/* obj/`;
-#}
-#
-#sub lib_babel{
-#    chdir "lib_babel";
-#    `perl make.pl libs`;
-#    chdir "../";
-#}
 
 sub libs{
     `mkdir -p obj`;
@@ -71,13 +50,6 @@ sub build{
         "g++ -std=c++11 test/main.cpp $obj_string -Isrc -o bin/test";
     `$build_string`;
 }
-
-#sub clean_all{
-#    chdir "lib_babel";
-#    `perl make.pl clean`;
-#    chdir "../";
-#    clean();
-#}
 
 sub clean{
     `rm -rf obj`;
