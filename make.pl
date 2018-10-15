@@ -37,7 +37,7 @@ sub libs{
     `mkdir -p obj`;
     chdir "src";
     `g++ -c *.cpp -std=c++11`;
-    `ar rcs libbabel.a *.o`;
+    `ar rcs libcnf_parse.a *.o`;
     `rm *.o`;
     `mv *.a ../obj`;
     chdir "../";
