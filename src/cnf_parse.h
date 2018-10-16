@@ -31,11 +31,11 @@ struct cstring_cmp {
 
 
 typedef struct {
-    int    *variables;
-    int    *clauses;
-    int     num_variables;
-    int     num_clauses;
-    int     num_assignments;
+    uint64_t *variables;
+    uint64_t *clauses;
+    int       num_variables;
+    int       num_clauses;
+    int       num_assignments;
 } clause_list;
 
 

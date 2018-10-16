@@ -3,6 +3,7 @@
 
 #include "cnf_parse.h"
 #include "cutils.h"
+#include <cstdint>
 
 using namespace std;
 
@@ -75,20 +76,23 @@ int read_format(char *dimacs_str, clause_list *cl){
 //
 int read_clauses(char *dimacs_str, clause_list *cl){
 
-    int clause_ctr   = 0;
+    int clause_ctr     = 0;
     int assignment_ctr = 0;
 
     char *token;
-    int   var_int;
+    uint64_t var_int;
 
     bool init_tok = true;
 
-    int *clauses   = (int*)malloc(sizeof(int)*(cl->num_clauses+1));
-    int *variables = (int*)malloc(sizeof(int)*CLAUSE_K*(cl->num_clauses+1));
-
-    // make into bstruct-compatible array
-    clauses[0] = (sizeof(int) * cl->num_clauses);
+    uint64_t *clauses   = (uint64_t*)malloc(sizeof(uint64_t)*(cl->num_clauses+1));
+    uint64_t *variables = (uint64_t*)malloc(sizeof(uint64_t)*CLAUSE_K*(cl->num_clauses+1));
+_dd(sizeof(uint64_t));
+_dd(cl->num_clauses);
+    // make uint64_to bstruct-compatible array
+    clauses[0] = (sizeof(uint64_t) * cl->num_clauses);
+_dd(*clauses);
     clauses++;
+_dd(*clauses);
 
     while(clause_ctr < cl->num_clauses){
         var_int=1;
@@ -135,12 +139,12 @@ int read_clauses(char *dimacs_str, clause_list *cl){
 //        cl->variables = (int*)malloc(sizeof(int)*assignment_ctr);
 //        memcpy(cl->variables, variables, sizeof(int)*assignment_ctr);
 //        free(variables);
-        cl->variables = (int*)malloc(sizeof(int)*(assignment_ctr+1));
+        cl->variables = (uint64_t*)malloc(sizeof(uint64_t)*(assignment_ctr+1));
 
-        cl->variables[0] = (sizeof(int) * assignment_ctr);
+        cl->variables[0] = (sizeof(uint64_t) * assignment_ctr);
         cl->variables++;
 
-        memcpy(cl->variables, variables, sizeof(int)*assignment_ctr);
+        memcpy(cl->variables, variables, sizeof(uint64_t)*assignment_ctr);
         free(variables);
     }
     else{
