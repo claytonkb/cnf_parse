@@ -83,11 +83,14 @@ int read_clauses(char *dimacs_str, clause_list *cl){
 
     bool init_tok = true;
 
-    int *clauses   = (int*)malloc(sizeof(int)*cl->num_clauses);
-    int *variables = (int*)malloc(sizeof(int)*CLAUSE_K*cl->num_clauses);
+    int *clauses   = (int*)malloc(sizeof(int)*(cl->num_clauses+1));
+    int *variables = (int*)malloc(sizeof(int)*CLAUSE_K*(cl->num_clauses+1));
+
+    // make into bstruct-compatible array
+    clauses[0] = (sizeof(int) * cl->num_clauses);
+    clauses++;
 
     while(clause_ctr < cl->num_clauses){
-
         var_int=1;
 
         clauses[clause_ctr] = assignment_ctr;
@@ -129,7 +132,14 @@ int read_clauses(char *dimacs_str, clause_list *cl){
     cl->clauses = clauses;
 
     if(assignment_ctr){
-        cl->variables = (int*)malloc(sizeof(int)*assignment_ctr);
+//        cl->variables = (int*)malloc(sizeof(int)*assignment_ctr);
+//        memcpy(cl->variables, variables, sizeof(int)*assignment_ctr);
+//        free(variables);
+        cl->variables = (int*)malloc(sizeof(int)*(assignment_ctr+1));
+
+        cl->variables[0] = (sizeof(int) * assignment_ctr);
+        cl->variables++;
+
         memcpy(cl->variables, variables, sizeof(int)*assignment_ctr);
         free(variables);
     }
