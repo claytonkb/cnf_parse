@@ -86,13 +86,10 @@ int read_clauses(char *dimacs_str, clause_list *cl){
 
     uint64_t *clauses   = (uint64_t*)malloc(sizeof(uint64_t)*(cl->num_clauses+1));
     uint64_t *variables = (uint64_t*)malloc(sizeof(uint64_t)*CLAUSE_K*(cl->num_clauses+1));
-_dd(sizeof(uint64_t));
-_dd(cl->num_clauses);
+
     // make uint64_to bstruct-compatible array
     clauses[0] = (sizeof(uint64_t) * cl->num_clauses);
-_dd(*clauses);
     clauses++;
-_dd(*clauses);
 
     while(clause_ctr < cl->num_clauses){
         var_int=1;
