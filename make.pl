@@ -36,7 +36,7 @@ sub make_all{
 sub libs{
     `mkdir -p lib`;
     chdir "src";
-    `g++ -c *.cpp -std=c++11`;
+    `gcc -c *.c`;
     `ar rcs libcnf_parse.a *.o`;
     `rm *.o`;
     `mv *.a ../lib`;
@@ -49,7 +49,7 @@ sub build{
     my $lib_string = "";
     for(@libs){ chomp $_; $lib_string .= "lib/$_ " };
     my $build_string =
-        "g++ -std=c++11 test/main.cpp $lib_string -Isrc -o bin/test";
+        "gcc test/main.c $lib_string -Isrc -o bin/test";
     `$build_string`;
 }
 
